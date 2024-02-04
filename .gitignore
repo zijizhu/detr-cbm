@@ -1,0 +1,6 @@
+*.pyc
+*.zip
+*.pth
+*.pkl
+
+__pycache__
