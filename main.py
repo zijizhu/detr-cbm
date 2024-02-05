@@ -69,4 +69,4 @@ if __name__ == '__main__':
     for epoch in range(0, num_epochs):
         train_stats = train_one_epoch(model, clip_model, criterion, dataloader, optimizer, device, epoch)
         torch.save({'train_stats': train_stats, 'model': model.state_dict()},
-                   os.path.join('checkpoints', 'detr_r50_to_clip_r50_linear_epoch{i}.pth'))
+                   os.path.join('checkpoints', f'detr_r50_to_clip_r50_linear_epoch{epoch}.pth'))
