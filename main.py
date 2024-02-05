@@ -3,7 +3,6 @@ import math
 import clip
 import torch
 from torch import nn
-from tqdm import tqdm
 from typing import Iterable
 
 import utils
@@ -30,7 +29,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
 
-    for samples, targets in tqdm(metric_logger.log_every(data_loader, print_freq, header), total=len(data_loader)):
+    for samples, targets in metric_logger.log_every(data_loader, print_freq, header):
         samples = samples.to(device)
         targets = targets.to(device)
 
