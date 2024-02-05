@@ -2,10 +2,20 @@ import sys
 import math
 import clip
 import torch
+from torch import nn
 from typing import Iterable
 
 import utils
+from torch.utils.data import DataLoader
 from dataset import Detr2ClipDataset, collate_fn
+
+
+class CosSimCriterion(nn.Module):
+    def __init__(self,) -> None:
+        self.cos = nn.CosineSimilarity()
+    
+    def forward(self, outputs, targets):
+        return torch.sum(self.cos(outputs, targets))
 
 def train_one_epoch(model: torch.nn.Module, image_encoder: torch.nn.Module, criterion: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
@@ -22,10 +32,11 @@ def train_one_epoch(model: torch.nn.Module, image_encoder: torch.nn.Module, crit
         samples = samples.to(device)
         targets = targets.to(device)
 
+        with torch.no_grad:
+            targets = image_encoder(targets)
 
         outputs = model(samples)
         loss = criterion(outputs, targets)
-        weight_dict = criterion.weight_dict
 
         # reduce losses over all GPUs for logging purposes
 
@@ -48,3 +59,13 @@ def train_one_epoch(model: torch.nn.Module, image_encoder: torch.nn.Module, crit
 
 if __name__ == '__main__':
     clip_model, clip_preprocess = clip.load('RN50')
+    model = nn.Linear(256, 1024)
+    dataset = Detr2ClipDataset()
+    criterion = CosSimCriterion()
+    dataloader = DataLoader(dataset=dataset, batch_size=64, collate_fn=collate_fn)
+    optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
+    device = 'cuda'
+
+    num_epochs = 100
+    for epoch in range(0, num_epochs):
+        train_stats = train_one_epoch(model, clip_model, criterion, dataloader, optimizer, device, epoch)
