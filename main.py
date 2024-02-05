@@ -37,7 +37,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
             targets = clip_encoder.encode_image(targets)
 
         outputs = model(samples)
-        loss = criterion(outputs, targets)
+        loss = criterion(outputs, targets, 1)
 
         # reduce losses over all GPUs for logging purposes
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     lr, weight_decay = 1e-4, 1e-4
     clip_model, clip_preprocess = clip.load('RN50')
     model = nn.Linear(256, 1024)
-    criterion = CosSimCriterion()
+    criterion = nn.CosineEmbeddingLoss()
     dataset = Detr2ClipDataset('data', 'coco', split='train', img_transforms=clip_preprocess)
     dataloader = DataLoader(dataset=dataset, batch_size=8, collate_fn=collate_fn)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
