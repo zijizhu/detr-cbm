@@ -1,3 +1,4 @@
+import os
 import sys
 import math
 import clip
@@ -10,15 +11,6 @@ from typing import Iterable
 import utils
 from torch.utils.data import DataLoader
 from dataset import Detr2ClipDataset, collate_fn
-
-
-class CosSimCriterion(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.cos = nn.CosineSimilarity()
-    
-    def forward(self, outputs, targets):
-        return torch.sum(self.cos(outputs, targets))
 
 
 def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, criterion: torch.nn.Module,
@@ -39,9 +31,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
             targets = clip_encoder.encode_image(targets, )
 
         outputs = model(samples)
-        loss = criterion(outputs, targets, torch.ones(outputs.size(0)))
-
-        # reduce losses over all GPUs for logging purposes
+        loss = criterion(outputs, targets, torch.ones(outputs.size(0)).to(device))
 
         if not math.isfinite(loss):
             print("Loss is {}, stopping training".format(loss))
@@ -55,6 +45,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
 
         metric_logger.update(loss=loss)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger)
@@ -77,4 +68,5 @@ if __name__ == '__main__':
     num_epochs = 5
     for epoch in range(0, num_epochs):
         train_stats = train_one_epoch(model, clip_model, criterion, dataloader, optimizer, device, epoch)
-        torch.save({'train_stats': train_stats, 'model': model.state_dict()}, 'detr_r50_to_clip_r50_linear_epoch{i}.pth')
+        torch.save({'train_stats': train_stats, 'model': model.state_dict()},
+                   os.path.join('checkpoints', 'detr_r50_to_clip_r50_linear_epoch{i}.pth'))
