@@ -3,6 +3,7 @@ import math
 import clip
 import torch
 from torch import nn
+from tqdm import tqdm
 from typing import Iterable
 
 import utils
@@ -24,11 +25,10 @@ def train_one_epoch(model: torch.nn.Module, image_encoder: torch.nn.Module, crit
     criterion.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
 
-    for samples, targets in metric_logger.log_every(data_loader, print_freq, header):
+    for samples, targets in tqdm(metric_logger.log_every(data_loader, print_freq, header), len=len(data_loader)):
         samples = samples.to(device)
         targets = targets.to(device)
 
@@ -58,14 +58,20 @@ def train_one_epoch(model: torch.nn.Module, image_encoder: torch.nn.Module, crit
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 if __name__ == '__main__':
+    lr, weight_decay = 1e-4, 1e-4
     clip_model, clip_preprocess = clip.load('RN50')
     model = nn.Linear(256, 1024)
     dataset = Detr2ClipDataset()
     criterion = CosSimCriterion()
     dataloader = DataLoader(dataset=dataset, batch_size=64, collate_fn=collate_fn)
-    optimizer = torch.optim.AdamW(param_dicts, lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     device = 'cuda'
 
     num_epochs = 100
+    epoch_results = []
     for epoch in range(0, num_epochs):
         train_stats = train_one_epoch(model, clip_model, criterion, dataloader, optimizer, device, epoch)
+        epoch_results.append((train_stats, model.state_dict()))
+    
+    best_loss, best_model = sorted(epoch_results, key=lambda x: x[0]['loss'])[0]
+    torch.save(best_model, 'detr2clip.pth')

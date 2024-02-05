@@ -1,5 +1,6 @@
 set -x
 
+git submodule update --init
 cd coco
 apt-get update -y && apt-get upgrade -y && apt-get install unzip zip -y
 wget -q --show-progress "http://images.cocodataset.org/zips/train2017.zip"
