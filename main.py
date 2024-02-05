@@ -39,7 +39,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
             targets = clip_encoder.encode_image(targets)
 
         outputs = model(samples)
-        loss = criterion(outputs, targets, 1)
+        loss = criterion(outputs, targets, torch.ones(outputs.size(0)))
 
         # reduce losses over all GPUs for logging purposes
 
