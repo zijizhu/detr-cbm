@@ -36,7 +36,7 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
         targets = targets.to(device)
 
         with torch.no_grad():
-            targets = clip_encoder.encode_image(targets)
+            targets = clip_encoder.encode_image(targets, )
 
         outputs = model(samples)
         loss = criterion(outputs, targets, torch.ones(outputs.size(0)))
@@ -74,11 +74,7 @@ if __name__ == '__main__':
     dataloader = DataLoader(dataset=dataset, batch_size=64, collate_fn=collate_fn, num_workers=8)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
-    num_epochs = 100
-    epoch_results = []
+    num_epochs = 5
     for epoch in range(0, num_epochs):
         train_stats = train_one_epoch(model, clip_model, criterion, dataloader, optimizer, device, epoch)
-        epoch_results.append((train_stats, model.state_dict()))
-    
-    best_loss, best_model = sorted(epoch_results, key=lambda x: x[0]['loss'])[0]
-    torch.save(best_model, 'detr_r50_to_clip_r50_linear.pth')
+        torch.save({'train_stats': train_stats, 'model': model.state_dict()}, 'detr_r50_to_clip_r50_linear_epoch{i}.pth')
