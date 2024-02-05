@@ -10,4 +10,5 @@ rm train2017.zip
 unzip -qq annotations_trainval2017.zip
 rm annotations_trainval2017.zip
 
-pip install scipy pycocotools
+pip install scipy pycocotools ftfy regex tqdm
+pip install git+https://github.com/openai/CLIP.git
