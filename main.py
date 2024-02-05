@@ -68,7 +68,7 @@ if __name__ == '__main__':
     random.seed(seed)
     lr, weight_decay = 1e-4, 1e-4
     clip_model, clip_preprocess = clip.load('RN50', device=device)
-    model = nn.Linear(256, 1024)
+    model = nn.Linear(256, 1024).to(device=device)
     criterion = nn.CosineEmbeddingLoss()
     dataset = Detr2ClipDataset('data', 'coco', split='train', img_transforms=clip_preprocess)
     dataloader = DataLoader(dataset=dataset, batch_size=64, collate_fn=collate_fn, num_workers=8)
