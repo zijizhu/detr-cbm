@@ -2,6 +2,8 @@ import sys
 import math
 import clip
 import torch
+import random
+import numpy as np
 from torch import nn
 from typing import Iterable
 
@@ -59,14 +61,18 @@ def train_one_epoch(model: torch.nn.Module, clip_encoder: torch.nn.Module, crite
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 if __name__ == '__main__':
+    device = 'cuda'
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
     lr, weight_decay = 1e-4, 1e-4
-    clip_model, clip_preprocess = clip.load('RN50')
+    clip_model, clip_preprocess = clip.load('RN50', device=device)
     model = nn.Linear(256, 1024)
     criterion = nn.CosineEmbeddingLoss()
     dataset = Detr2ClipDataset('data', 'coco', split='train', img_transforms=clip_preprocess)
-    dataloader = DataLoader(dataset=dataset, batch_size=8, collate_fn=collate_fn)
+    dataloader = DataLoader(dataset=dataset, batch_size=64, collate_fn=collate_fn, num_workers=8)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    device = 'cpu'
 
     num_epochs = 100
     epoch_results = []
