@@ -6,3 +6,5 @@
 .vscode
 .DS_Store
 __pycache__
+
+coco/*/
