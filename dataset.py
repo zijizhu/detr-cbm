@@ -6,9 +6,11 @@ from torch.utils.data import Dataset
 
 
 class Detr2ClipDataset(Dataset):
-    def __init__(self, data_dir, coco_dir, split='train', img_transforms=None) -> None:
+    def __init__(self, data_dir, coco_dir, split='train', img_transforms=None, return_pil=False, return_info=False) -> None:
         super().__init__()
         self.train_data = []
+        self.return_pil = return_pil
+        self.return_info = return_info
         if split == 'train':
             coco_ann_dir = os.path.join(coco_dir, 'annotations', 'instances_train2017.json')
             for i in range(1, 60):
@@ -42,8 +44,12 @@ class Detr2ClipDataset(Dataset):
             cropped = img.crop(box)
             cropped_transformed = self.img_transforms(cropped)
             all_cropped_imgs.append(cropped_transformed)
-        
-        return sample['detr_features'], torch.stack(all_cropped_imgs)
+        if self.return_info:
+            return (sample['detr_features'],
+                    all_cropped_imgs if self.return_pil else torch.stack(all_cropped_imgs),
+                    img_id,
+                    sample['gt_labels'])
+        return sample['detr_features'], all_cropped_imgs if self.return_pil else torch.stack(all_cropped_imgs)
 
 
 def collate_fn(batch):
