@@ -11,5 +11,5 @@ bash download.sh
 
 Build dataset:
 ```bash
-python build_data.py --orig_size --square --input_dir detr_outputs --output_dir data
+python build_data_detr2clip.py --orig_size --square --input_dir detr_outputs --output_dir data
 ```
