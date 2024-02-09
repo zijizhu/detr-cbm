@@ -14,7 +14,7 @@ import torchvision
 from detr.datasets.coco import make_coco_transforms, ConvertCocoPolysToMask
 import detr.util.misc as utils
 from detr.datasets import build_dataset, get_coco_api_from_dataset
-from detr.engine import evaluate_and_save
+from detr_clip_engine import evaluate_and_save
 from detr.models import build_model
 
 
@@ -31,8 +31,7 @@ def get_args_parser():
                         help='gradient clipping max norm')
 
     # Model parameters
-    parser.add_argument('--frozen_weights', type=str, default=None,
-                        help="Path to the pretrained model. If set, only the mask head will be trained")
+
     # * Backbone
     parser.add_argument('--backbone', default='resnet50', type=str,
                         help="Name of the convolutional backbone to use")
@@ -147,9 +146,6 @@ def build_dataset(image_set, args):
 def main(args):
     utils.init_distributed_mode(args)
     print("git:\n  {}\n".format(utils.get_sha()))
-
-    if args.frozen_weights is not None:
-        assert args.masks, "Frozen training is meant for segmentation only"
     print(args)
 
     device = torch.device(args.device)
@@ -185,10 +181,6 @@ def main(args):
 
     base_ds = get_coco_api_from_dataset(dataset_val)
 
-    if args.frozen_weights is not None:
-        checkpoint = torch.load(args.frozen_weights, map_location='cpu')
-        model_without_ddp.detr.load_state_dict(checkpoint['model'])
-
     output_dir = Path(args.output_dir)
     if args.resume:
         if args.resume.startswith('https'):
@@ -200,7 +192,7 @@ def main(args):
 
     if args.split == 'train':
         stats, coco_evaluator = evaluate_and_save(model, criterion, postprocessors,
-                                                  data_loader_val, base_ds, device, args.output_dir)
+                                                  data_loader_train, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
