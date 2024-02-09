@@ -2,6 +2,7 @@
 import argparse
 import datetime
 import json
+import clip
 import random
 import time
 from pathlib import Path
@@ -90,7 +91,6 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
-    parser.add_argument('--resume', default='', help='resume from checkpoint')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     parser.add_argument('--split', type=str, default='train', choices=['train', 'test'])
@@ -156,13 +156,11 @@ def main(args):
     np.random.seed(seed)
     random.seed(seed)
 
-    model, criterion, postprocessors = build_model(args)
-    model.to(device)
+    detr_model, criterion, postprocessors = build_model(args)
+    detr_model.to(device)
 
-    model_without_ddp = model
     if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-        model_without_ddp = model.module
+        detr_model = torch.nn.parallel.DistributedDataParallel(detr_model, device_ids=[args.gpu])
 
     dataset_train = build_dataset(image_set='train', args=args)
     dataset_val = build_dataset(image_set='val', args=args)
@@ -182,22 +180,15 @@ def main(args):
     base_ds = get_coco_api_from_dataset(dataset_val)
 
     output_dir = Path(args.output_dir)
-    if args.resume:
-        if args.resume.startswith('https'):
-            checkpoint = torch.hub.load_state_dict_from_url(
-                args.resume, map_location='cpu', check_hash=True)
-        else:
-            checkpoint = torch.load(args.resume, map_location='cpu')
-        model_without_ddp.load_state_dict(checkpoint['model'])
 
     if args.split == 'train':
-        stats, coco_evaluator = evaluate_and_save(model, criterion, postprocessors,
+        stats, coco_evaluator = evaluate_and_save(detr_model, criterion, postprocessors,
                                                   data_loader_train, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
     else:
-        stats, coco_evaluator = evaluate_and_save(model, criterion, postprocessors,
+        stats, coco_evaluator = evaluate_and_save(detr_model, criterion, postprocessors,
                                                   data_loader_val, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")

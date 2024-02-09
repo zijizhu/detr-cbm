@@ -14,16 +14,15 @@ from detr.datasets.coco_eval import CocoEvaluator
 
 
 @torch.no_grad()
-def evaluate_and_save(model,
+def evaluate_and_save(detr_model,
                       clip_model,
                       detr_criterion,
                       detr_postprocessors,
                       data_loader,
                       base_ds,
                       device,
-                      output_dir,
-                      split):
-    model.eval()
+                      output_dir):
+    detr_model.eval()
     detr_criterion.eval()
 
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -40,7 +39,7 @@ def evaluate_and_save(model,
 
         clip_features = clip_model(samples_clip)
 
-        hs, outputs = model(samples_detr)
+        hs, outputs = detr_model(samples_detr)
     
         loss_dict = detr_criterion(outputs, targets)
         weight_dict = detr_criterion.weight_dict
