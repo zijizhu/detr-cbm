@@ -94,7 +94,6 @@ def get_args_parser():
     parser.add_argument('--resume', default='', help='resume from checkpoint')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
-    parser.add_argument('--split', type=str, default='train', choices=['train', 'test'])
     parser.add_argument('--num_workers', default=2, type=int)
 
     # distributed training parameters
@@ -102,6 +101,7 @@ def get_args_parser():
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
 
+    parser.add_argument('--split', type=str, default='train', choices=['train', 'val'])
     parser.add_argument('--clip_name', default='RN50', type=str, 
                         choices=['RN50', 'RN101', 'ViT-B/32', 'ViT-B/16'])
 
