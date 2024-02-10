@@ -23,7 +23,7 @@ def get_args_parser():
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
     parser.add_argument('--lr', default=1e-4, type=float)
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
-    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--batch_size', default=8, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--lr_drop', default=200, type=int)
@@ -91,6 +91,7 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
+    parser.add_argument('--resume', default='', help='resume from checkpoint')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     parser.add_argument('--split', type=str, default='train', choices=['train', 'test'])
@@ -100,6 +101,10 @@ def get_args_parser():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
+
+    parser.add_argument('--clip_name', default='RN50', type=str, 
+                        choices=['RN50', 'RN101', 'ViT-B/32', 'ViT-B/16'])
+
 
     return parser
 
@@ -122,10 +127,10 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         
         if self._clip_transforms is not None:
             clip_img = self._clip_transforms(img)
-        return detr_img, clip_img,  target
+        return detr_img, clip_img, target
 
 
-def build_dataset(image_set, args):
+def build_dataset(image_set, clip_transforms, args):
     root = Path(args.coco_path)
     assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
@@ -137,10 +142,10 @@ def build_dataset(image_set, args):
     img_folder, ann_file = PATHS[image_set]
     dataset = CocoDetection(img_folder,
                             ann_file,
-                            transforms=make_coco_transforms(image_set, augmentation=args.augmentation),
+                            detr_transforms=make_coco_transforms(image_set, augmentation=args.augmentation),
+                            clip_transforms=clip_transforms,
                             return_masks=args.masks)
     return dataset
-
 
 
 def main(args):
@@ -155,40 +160,35 @@ def main(args):
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
+    
+    clip_model, clip_preprocess = clip.load(args.clip_name, device=args.device)
 
     detr_model, criterion, postprocessors = build_model(args)
     detr_model.to(device)
 
-    if args.distributed:
-        detr_model = torch.nn.parallel.DistributedDataParallel(detr_model, device_ids=[args.gpu])
-
-    dataset_train = build_dataset(image_set='train', args=args)
-    dataset_val = build_dataset(image_set='val', args=args)
-
-    if args.distributed:
-        sampler_train = DistributedSampler(dataset_train, shuffle=False)
-        sampler_val = DistributedSampler(dataset_val, shuffle=False)
-    else:
-        sampler_train = torch.utils.data.SequentialSampler(dataset_train)
-        sampler_val = torch.utils.data.SequentialSampler(dataset_val)
-
-    data_loader_train = DataLoader(dataset_train, args.batch_size, batch_sampler=sampler_train,
-                                   drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
-    data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
-                                 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
+    dataset_train = build_dataset(image_set='train', clip_transforms=clip_preprocess, args=args)
+    dataset_val = build_dataset(image_set='val', clip_transforms=clip_preprocess, args=args)
+    
+    data_loader_train = DataLoader(dataset_train, args.batch_size, drop_last=False,
+                                   collate_fn=utils.collate_fn, num_workers=args.num_workers)
+    data_loader_val = DataLoader(dataset_val, args.batch_size, drop_last=False,
+                                 collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     base_ds = get_coco_api_from_dataset(dataset_val)
 
     output_dir = Path(args.output_dir)
+    if args.resume:
+        checkpoint = torch.load(args.resume, map_location='cpu')
+        detr_model.load_state_dict(checkpoint['model'])
 
     if args.split == 'train':
-        stats, coco_evaluator = evaluate_and_save(detr_model, criterion, postprocessors,
+        stats, coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
                                                   data_loader_train, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
     else:
-        stats, coco_evaluator = evaluate_and_save(detr_model, criterion, postprocessors,
+        stats, coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
                                                   data_loader_val, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")

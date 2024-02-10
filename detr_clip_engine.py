@@ -34,6 +34,7 @@ def evaluate_and_save(detr_model,
     num_processed = 0
     save_dicts = []
     for samples_detr, samples_clip, targets in metric_logger.log_every(data_loader, 10, header):
+        print(samples_clip)
         samples_detr, samples_clip = samples_detr.to(device), samples_clip.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
