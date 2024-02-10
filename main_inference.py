@@ -189,14 +189,14 @@ def main(args):
     if args.split == 'train':
         base_ds = get_coco_api_from_dataset(dataset_train)
         coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
-                                           data_loader_train, base_ds, device, args.output_dir)
+                                           data_loader_train, base_ds, device, args.output_dir, 'train')
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
     else:
         base_ds = get_coco_api_from_dataset(dataset_val)
         coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
-                                           data_loader_val, base_ds, device, args.output_dir)
+                                           data_loader_val, base_ds, device, args.output_dir, 'val')
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return

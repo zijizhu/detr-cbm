@@ -22,7 +22,8 @@ def evaluate_and_save(detr_model,
                       data_loader,
                       base_ds,
                       device,
-                      output_dir):
+                      output_dir,
+                      split):
     detr_model.eval()
     detr_criterion.eval()
 
@@ -65,7 +66,7 @@ def evaluate_and_save(detr_model,
         
         num_processed += batch_size
         if num_processed == 5000:
-            torch.save(save_dicts, os.path.join(output_dir, f'detr_clip_feats{num_processed // 5000}.pth'))
+            torch.save(save_dicts, os.path.join(output_dir, f'detr_clip_{split}{num_processed // 5000}.pth'))
             del save_dicts
             save_dicts = []
         ##########
