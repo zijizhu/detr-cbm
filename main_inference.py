@@ -12,8 +12,8 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import torchvision
-from detr.datasets.coco import make_coco_transforms, ConvertCocoPolysToMask
 import detr.util.misc as utils
+from detr.datasets.coco import make_coco_transforms, ConvertCocoPolysToMask
 from detr.datasets import build_dataset, get_coco_api_from_dataset
 from detr_clip_engine import evaluate_and_save
 from detr.models import build_model
@@ -130,6 +130,13 @@ class CocoDetection(torchvision.datasets.CocoDetection):
         return detr_img, clip_img, target
 
 
+def collate_fn(batch):
+    batch = list(zip(*batch))
+    batch[0] = utils.nested_tensor_from_tensor_list(batch[0])
+    batch[1] = torch.stack(batch[1])
+    return tuple(batch)
+
+
 def build_dataset(image_set, clip_transforms, args):
     root = Path(args.coco_path)
     assert root.exists(), f'provided COCO path {root} does not exist'
@@ -170,11 +177,9 @@ def main(args):
     dataset_val = build_dataset(image_set='val', clip_transforms=clip_preprocess, args=args)
     
     data_loader_train = DataLoader(dataset_train, args.batch_size, drop_last=False,
-                                   collate_fn=utils.collate_fn, num_workers=args.num_workers)
+                                   collate_fn=collate_fn, num_workers=args.num_workers)
     data_loader_val = DataLoader(dataset_val, args.batch_size, drop_last=False,
-                                 collate_fn=utils.collate_fn, num_workers=args.num_workers)
-
-    base_ds = get_coco_api_from_dataset(dataset_val)
+                                 collate_fn=collate_fn, num_workers=args.num_workers)
 
     output_dir = Path(args.output_dir)
     if args.resume:
@@ -182,14 +187,16 @@ def main(args):
         detr_model.load_state_dict(checkpoint['model'])
 
     if args.split == 'train':
-        stats, coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
-                                                  data_loader_train, base_ds, device, args.output_dir)
+        base_ds = get_coco_api_from_dataset(dataset_train)
+        coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
+                                           data_loader_train, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
     else:
-        stats, coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
-                                                  data_loader_val, base_ds, device, args.output_dir)
+        base_ds = get_coco_api_from_dataset(dataset_val)
+        coco_evaluator = evaluate_and_save(detr_model, clip_model, criterion, postprocessors,
+                                           data_loader_val, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return

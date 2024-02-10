@@ -5,6 +5,7 @@ Train and eval functions used in main.py
 import math
 import os
 import sys
+from tqdm import tqdm
 from typing import Iterable
 
 import torch
@@ -25,36 +26,17 @@ def evaluate_and_save(detr_model,
     detr_model.eval()
     detr_criterion.eval()
 
-    metric_logger = utils.MetricLogger(delimiter="  ")
-    metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
-    header = 'Test:'
-
     coco_evaluator = CocoEvaluator(base_ds, ('bbox',))
 
     num_processed = 0
     save_dicts = []
-    for samples_detr, samples_clip, targets in metric_logger.log_every(data_loader, 10, header):
-        print(samples_clip)
+    for samples_detr, samples_clip, targets in tqdm(data_loader):
         samples_detr, samples_clip = samples_detr.to(device), samples_clip.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        clip_features = clip_model(samples_clip)
+        clip_features = clip_model.encode_image(samples_clip)
 
         hs, outputs = detr_model(samples_detr)
-    
-        loss_dict = detr_criterion(outputs, targets)
-        weight_dict = detr_criterion.weight_dict
-
-        # reduce losses over all GPUs for logging purposes
-        loss_dict_reduced = utils.reduce_dict(loss_dict)
-        loss_dict_reduced_scaled = {k: v * weight_dict[k]
-                                    for k, v in loss_dict_reduced.items() if k in weight_dict}
-        loss_dict_reduced_unscaled = {f'{k}_unscaled': v
-                                      for k, v in loss_dict_reduced.items()}
-        metric_logger.update(loss=sum(loss_dict_reduced_scaled.values()),
-                             **loss_dict_reduced_scaled,
-                             **loss_dict_reduced_unscaled)
-        metric_logger.update(class_error=loss_dict_reduced['class_error'])
 
         orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
         results = detr_postprocessors['bbox'](outputs, orig_target_sizes)
@@ -63,11 +45,23 @@ def evaluate_and_save(detr_model,
         ##### Save outputs #####
         # Each iteration, outputs is a dict with tensors of [batch_size, ...] as values
         #                 targets is a list of dict, len(targets) == batch_size
+        outputs = [{'pred_logits': logits, 'pred_boxes': boxes}
+                   for logits, boxes
+                   in zip(outputs['pred_logits'].detach().cpu(), outputs['pred_boxes'].detach().cpu())]
+        
         batch_size = hs.size(1)
-        save_dicts.append({'detr_f': hs[-1].detach().cpu(),
-                           'clip_f': clip_features.detach().cpu(),
-                           'outputs': {k: v.detach().cpu() for k, v in outputs.items()},
-                           'targets': [{k: v.detach().cpu() for k, v in t.items()} for t in targets]})
+        assert (len(clip_features) == batch_size and
+                len(outputs) == batch_size and
+                len(targets) == batch_size)
+        
+        for detr_f, clip_f, out, tgt, in zip(hs[-1].detach().cpu(),
+                                             clip_features.detach().cpu(),
+                                             outputs,
+                                             targets):
+            save_dicts.append({'detr_f': detr_f,
+                               'clip_f': clip_f,
+                               'outputs': out,
+                               'targets': {k: v.detach().cpu() for k, v in tgt.items()}})
         
         num_processed += batch_size
         if num_processed == 5000:
@@ -80,8 +74,6 @@ def evaluate_and_save(detr_model,
             coco_evaluator.update(res)
 
     # gather the stats from all processes
-    metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
     if coco_evaluator is not None:
         coco_evaluator.synchronize_between_processes()
 
@@ -89,7 +81,5 @@ def evaluate_and_save(detr_model,
     if coco_evaluator is not None:
         coco_evaluator.accumulate()
         coco_evaluator.summarize()
-    stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-    if coco_evaluator is not None and 'bbox' in detr_postprocessors.keys():
-        stats['coco_eval_bbox'] = coco_evaluator.coco_eval['bbox'].stats.tolist()
-    return stats, coco_evaluator
+
+    return coco_evaluator
