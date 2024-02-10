@@ -65,7 +65,7 @@ def evaluate_and_save(detr_model,
                                'targets': {k: v.detach().cpu() for k, v in tgt.items()}})
         
         num_processed += batch_size
-        if num_processed == 5000:
+        if num_processed % 5000 == 0:
             torch.save(save_dicts, os.path.join(output_dir, f'detr_clip_{split}{num_processed // 5000}.pth'))
             del save_dicts
             save_dicts = []
