@@ -15,7 +15,12 @@ Run detr inference on coco train and val
 python main_inference.py --device cuda --output_dir outputs --resume checkpoints/detr-r50-e632da11.pth --coco_path coco
 ```
 
-Run training script
+Run training script with detr's default hyperparameters
 ```bash
-python main_inference.py --device cuda --output_dir outputs --resume checkpoints/detr-r50-e632da11.pth --coco_path coco
+python main_detr_cbm.py --dataset_path data --coco_path coco --output_dir outputs --device cpu
+```
+
+Run training script with clip4hoi's default hyperparameters
+```bash
+python main_detr_cbm.py --dataset_path data --coco_path coco --output_dir outputs --device cpu
 ```

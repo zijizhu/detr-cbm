@@ -110,7 +110,7 @@ def main(args):
     # Build models
     clip_model, _ = clip.load(args.clip_name, device=device)
     texts = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
-    texts_tokenized = clip.tokenize(texts)
+    texts_tokenized = clip.tokenize(texts).to(device)
     texts_encoded = clip_model.encode_text(texts_tokenized)
 
     d_clip = 1024 if args.clip_name == 'RN50' else 512
