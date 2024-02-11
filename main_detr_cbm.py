@@ -8,16 +8,33 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import clip
 from torch.utils.data import DataLoader, DistributedSampler
 
+from model import build_model
 import detr.util.misc as utils
+from detr.models.matcher import build_matcher
 from dataset import DetrClipDataset, collate_fn
 from engine_detr_cbm import evaluate, train_one_epoch
-from model import build_model
+from detr.models.detr import PostProcess, SetCriterion
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
+    parser.add_argument('--dataset_path', type=str)
+    parser.add_argument('--coco_path', type=str)
+    parser.add_argument('--clip_name', default='ViT-B/16', type=str, 
+                        choices=['RN50', 'ViT-B/32', 'ViT-B/16'])
+    parser.add_argument('--output_dir', default='',
+                        help='path where to save, empty for no saving')
+    parser.add_argument('--device', default='cuda',
+                        help='device to use for training / testing')
+    parser.add_argument('--seed', default=42, type=int)
+    parser.add_argument('--resume', default='', help='resume from checkpoint')
+    parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
+                        help='start epoch')
+    parser.add_argument('--num_workers', default=2, type=int)
+    
     parser.add_argument('--lr', default=1e-4, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
@@ -25,7 +42,7 @@ def get_args_parser():
     parser.add_argument('--lr_drop', default=200, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
-
+    
     # * Transformer
     parser.add_argument('--dec_layers', default=6, type=int,
                         help="Number of decoding layers in the transformer")
@@ -37,8 +54,6 @@ def get_args_parser():
                         help="Dropout applied in the transformer")
     parser.add_argument('--nheads', default=8, type=int,
                         help="Number of attention heads inside the transformer's attentions")
-    parser.add_argument('--num_queries', default=100, type=int,
-                        help="Number of query slots")
     parser.add_argument('--pre_norm', action='store_true')
 
     # * Matcher
@@ -61,8 +76,6 @@ def main(args):
     utils.init_distributed_mode(args)
     print("git:\n  {}\n".format(utils.get_sha()))
 
-    if args.frozen_weights is not None:
-        assert args.masks, "Frozen training is meant for segmentation only"
     print(args)
 
     device = torch.device(args.device)
@@ -73,24 +86,8 @@ def main(args):
     np.random.seed(seed)
     random.seed(seed)
 
-    model, criterion, postprocessors = build_model(args)
-    model.to(device)
-
-    model_without_ddp = model
-    if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-        model_without_ddp = model.module
-    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('number of params:', n_parameters)
-
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr,
-                                  weight_decay=args.weight_decay)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
-
-    dataset_train = DetrClipDataset(dataset_dir='data', coco_dir='coco', split='train')
-    dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
-    dataset_val = DetrClipDataset(dataset_dir='data', coco_dir='coco', split='val')
-    dataloader_val = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
+    dataset_train = DetrClipDataset(dataset_dir=args.dataset_path, coco_dir=args.coco_path, split='train')
+    dataset_val = DetrClipDataset(dataset_dir=args.dataset_path, coco_dir=args.coco_path, split='val')
 
     if args.distributed:
         sampler_train = DistributedSampler(dataset_train)
@@ -108,6 +105,36 @@ def main(args):
                                  drop_last=False, collate_fn=collate_fn, num_workers=args.num_workers)
 
     base_ds = dataset_val.coco
+
+    # Build models
+    clip_model, _ = clip.load(args.clip_name, device=device)
+    texts = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
+    texts_tokenized = clip.tokenize(texts)
+    texts_encoded = clip_model.encode_text(texts_tokenized)
+
+    d_clip = 1024 if args.clip_name == 'RN50' else 512
+    model = build_model(256, d_clip, texts_encoded, args)
+
+    weight_dict = {'loss_ce': 1, 'loss_bbox': args.bbox_loss_coef, 'loss_giou': args.giou_loss_coef}
+    losses = ['labels', 'boxes', 'cardinality']
+
+    matcher = build_matcher(args)
+    criterion = SetCriterion(91, matcher, weight_dict, args.eos_coef, losses=losses)
+    postprocessors = PostProcess()
+
+    model.to(device)
+    criterion.to(device)
+
+    model_without_ddp = model
+    if args.distributed:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+        model_without_ddp = model.module
+    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('number of params:', n_parameters)
+
+    optimizer = torch.optim.AdamW(model_without_ddp.parameters(), lr=args.lr,
+                                  weight_decay=args.weight_decay)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
     output_dir = Path(args.output_dir)
     if args.resume:
@@ -148,7 +175,7 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator, _ = evaluate(
+        test_stats, coco_evaluator = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
         )
 
