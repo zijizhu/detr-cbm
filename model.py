@@ -20,13 +20,13 @@ def build_model(d_detr, d_clip, text_encoded, args):
 
 
 class DetrClipFuserV2(nn.Module):
-    def __init__(self, d_detr, d_clip, text_encoded, nhead=8,
+    def __init__(self, d_detr, d_clip, text_encoded: torch.Tensor, nhead=8,
                  num_layers=6, dim_feedforward=2048, dropout=0.1,
                  activation='relu', normalize_before=False,
                  return_intermediate=False) -> None:
         super().__init__()
         self.d_model = d_clip
-        self.register_buffer('text_encoded', text_encoded)
+        self.register_buffer('text_encoded', text_encoded.detach())
         self.linear_projection = nn.Linear(d_detr, d_clip)
         decoder_layer = TransformerDecoderLayer(self.d_model, nhead, dim_feedforward,
                                                 dropout, activation, normalize_before)

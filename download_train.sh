@@ -6,7 +6,7 @@ pip install scipy pycocotools ftfy regex tqdm gdown
 pip install git+https://github.com/openai/CLIP.git
 
 cd data
-gdown "1DuLD7KgmpHUM_9L7NV5GZNppcXmtEwqO"
+gdown "1k8yrcd1qXNbkihtIJeCeuEPJ_i8fZeJq"
 gdown "16-EtigRUMYasCZGv4QILnvTdbEi1fGp6"
 
 unzip -qq detr_rn50_clip_vit-b16.zip
