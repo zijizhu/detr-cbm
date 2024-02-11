@@ -114,7 +114,7 @@ def main(args):
     texts_encoded = clip_model.encode_text(texts_tokenized)
 
     d_clip = 1024 if args.clip_name == 'RN50' else 512
-    model = build_model(256, d_clip, texts_encoded, args)
+    model = build_model(256, d_clip, texts_encoded.float(), args)
 
     weight_dict = {'loss_ce': 1, 'loss_bbox': args.bbox_loss_coef, 'loss_giou': args.giou_loss_coef}
     losses = ['labels', 'boxes', 'cardinality']
