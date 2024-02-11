@@ -40,7 +40,7 @@ class DetrClipFuserV2(nn.Module):
         out = self.decoder(tgt=detr_projected, memory=clip_img_feature)
         out = out.squeeze(0).transpose(0, 1)
         logits = out @ self.text_encoded.T
-        return logits
+        return out, logits
 
 
 def _get_activation_fn(activation):

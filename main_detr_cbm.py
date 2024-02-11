@@ -176,9 +176,12 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator = evaluate(
+        test_stats, coco_evaluator, val_outputs = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device
         )
+        if args.output_dir:
+            val_output_paths = output_dir / f'val_outputs{epoch}.pth'
+            utils.save_on_master(val_outputs, val_output_paths)
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},

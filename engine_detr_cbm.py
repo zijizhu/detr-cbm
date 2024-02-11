@@ -72,12 +72,12 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device):
 
     iou_types = ('bbox',)
     coco_evaluator = CocoEvaluator(base_ds, iou_types)
-
+    saved_outputs = []
     for detr_fs, clip_fs, detr_logits, detr_boxes, targets in metric_logger.log_every(data_loader, 10, header):
         detr_fs, clip_fs = detr_fs.to(device), clip_fs.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        logits = model(clip_fs, detr_fs)
+        features, logits = model(clip_fs, detr_fs)
         outputs = {'pred_logits': logits, 'pred_boxes': detr_boxes.to(device)}
 
         loss_dict = criterion(outputs, targets)
@@ -100,6 +100,8 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device):
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
         if coco_evaluator is not None:
             coco_evaluator.update(res)
+        
+        saved_outputs.append({'features': features, 'outputs': outputs, 'targets': targets})
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
@@ -114,4 +116,4 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device):
     stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
     if coco_evaluator is not None:
         stats['coco_eval_bbox'] = coco_evaluator.coco_eval['bbox'].stats.tolist()
-    return stats, coco_evaluator
+    return stats, coco_evaluator, saved_outputs
