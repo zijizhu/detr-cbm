@@ -10,5 +10,5 @@ gdown "1k8yrcd1qXNbkihtIJeCeuEPJ_i8fZeJq"
 gdown "16-EtigRUMYasCZGv4QILnvTdbEi1fGp6"
 
 unzip -qq detr_rn50_clip_vit-b16.zip
-mv detr_rn50_clip_vit-b16/* .
+mv outputs/* .
 rm detr_rn50_clip_vit-b16.zip
