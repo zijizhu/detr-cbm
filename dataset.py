@@ -1,5 +1,6 @@
 import os
 import torch
+from tqdm import tqdm
 from PIL import Image
 from pycocotools.coco import COCO
 from torch.utils.data import Dataset
@@ -52,10 +53,37 @@ class Detr2ClipDataset(Dataset):
         return sample['detr_features'], all_cropped_imgs if self.return_pil else torch.stack(all_cropped_imgs)
 
 
-def collate_fn(batch):
+def collate_fn_detr2clip(batch):
     batch_detr_features = []
     batch_clip_imgs = []
     for detr_feat, img in batch:
         batch_detr_features.append(detr_feat)
         batch_clip_imgs.append(img)
     return torch.cat(batch_detr_features), torch.cat(batch_clip_imgs)
+
+
+class DetrClipDataset(Dataset):
+    def __init__(self, dataset_dir, coco_dir, split) -> None:
+        self.data = []
+        assert split in ['train', 'val']
+        ann_filename = 'instances_train2017.json' if split == 'train' else 'instances_val2017.json'
+        self.coco = COCO(os.path.join(coco_dir, 'annotations', ann_filename))
+        print('Loading preprocessed samples into memory...')
+        sample_filenames = [fn for fn in os.listdir(dataset_dir) if f'detr_clip_{split}' in fn]
+        for fn in tqdm(sample_filenames):
+            self.data += torch.load(os.path.join(dataset_dir, fn))
+    
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, idx):
+        item = self.data[idx]
+        detr_f, clip_f = item['detr_f'], item['clip_f']
+        outputs, targets = item['outputs'],item['targets']
+        detr_logits, detr_boxes = outputs['pred_logits'], outputs['pred_boxes']
+        return detr_f, clip_f.float(), detr_logits, detr_boxes, targets
+
+def collate_fn(batch):
+    batch = list(zip(*batch))
+    batch = [torch.stack(item) for item in batch[:-1]] + [batch[-1]]
+    return batch

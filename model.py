@@ -1,4 +1,3 @@
-import clip
 import torch
 import copy
 from torch import nn
@@ -27,7 +26,7 @@ class DetrClipFuserV2(nn.Module):
                  return_intermediate=False) -> None:
         super().__init__()
         self.d_model = d_clip
-        self.text_encoded = text_encoded
+        self.register_buffer('text_encoded', text_encoded)
         self.linear_projection = nn.Linear(d_detr, d_clip)
         decoder_layer = TransformerDecoderLayer(self.d_model, nhead, dim_feedforward,
                                                 dropout, activation, normalize_before)
@@ -35,8 +34,9 @@ class DetrClipFuserV2(nn.Module):
         self.decoder = TransformerDecoder(decoder_layer, num_layers, decoder_norm, return_intermediate)
     
     def forward(self, clip_img_feature, detr_proposals):
+        clip_img_feature = clip_img_feature.unsqueeze(0)
+        detr_proposals = detr_proposals.transpose(0, 1)
         detr_projected = self.linear_projection(detr_proposals)
-        print(detr_projected.shape)
         out = self.decoder(tgt=detr_projected, memory=clip_img_feature)
         out = out.squeeze(0).transpose(0, 1)
         logits = out @ self.text_encoded.T
