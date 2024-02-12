@@ -24,7 +24,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         detr_fs, clip_fs = detr_fs.to(device), clip_fs.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        logits = model(clip_fs, detr_fs)
+        _, logits = model(clip_fs, detr_fs)
         outputs = {'pred_logits': logits, 'pred_boxes': detr_boxes.to(device)}
         loss_dict = criterion(outputs, targets)
         weight_dict = criterion.weight_dict
