@@ -12,6 +12,7 @@ def build_model(d_detr, d_clip, text_encoded, args):
         d_detr=d_detr,
         d_clip=d_clip,
         text_encoded=text_encoded,
+        linear_probe=args.concepts,
         nhead=args.nhead,
         num_layers=args.num_layers,
         dim_feedforward=args.dim_feedforward,
@@ -20,8 +21,8 @@ def build_model(d_detr, d_clip, text_encoded, args):
 
 
 class DetrClipFuserV2(nn.Module):
-    def __init__(self, d_detr, d_clip, text_encoded: torch.Tensor, nhead=8,
-                 num_layers=6, dim_feedforward=2048, dropout=0.1,
+    def __init__(self, d_detr, d_clip, text_encoded: torch.Tensor, linear_probe=False,
+                 nclass=92, nhead=8, num_layers=6, dim_feedforward=2048, dropout=0.1,
                  activation='relu', normalize_before=False,
                  return_intermediate=False) -> None:
         super().__init__()
@@ -32,6 +33,10 @@ class DetrClipFuserV2(nn.Module):
                                                 dropout, activation, normalize_before)
         decoder_norm = nn.LayerNorm(self.d_model)
         self.decoder = TransformerDecoder(decoder_layer, num_layers, decoder_norm, return_intermediate)
+        if linear_probe:
+            self.fc = nn.Linear(text_encoded.size(0), nclass)
+        else:
+            self.fc = None
     
     def forward(self, clip_img_feature, detr_proposals):
         clip_img_feature = clip_img_feature.unsqueeze(0)
@@ -40,6 +45,8 @@ class DetrClipFuserV2(nn.Module):
         out = self.decoder(tgt=detr_projected, memory=clip_img_feature)
         out = out.squeeze(0).transpose(0, 1)
         logits = out @ self.text_encoded.T
+        if self.fc is not None:
+            logits = self.fc(logits)
         return out, logits
 
 

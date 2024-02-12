@@ -35,6 +35,7 @@ def get_args_parser():
                         help='start epoch')
     parser.add_argument('--num_workers', default=0, type=int)
     parser.add_argument('--eval', action='store_true')
+    parser.add_argument('--concepts', action='store_true')
     
     parser.add_argument('--lr', default=1e-4, type=float)
     parser.add_argument('--batch_size', default=32, type=int)
@@ -109,9 +110,21 @@ def main(args):
 
     # Build models
     clip_model, _ = clip.load(args.clip_name, device=device)
-    texts = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
-    texts_tokenized = clip.tokenize(texts).to(device)
-    texts_encoded = clip_model.encode_text(texts_tokenized)
+    if args.concepts:
+        concepts = []
+        with open('data/concepts_cleaned.json', 'r') as fp:
+            concepts_dict = json.load(fp=fp)
+        concepts = []
+        for v in concepts_dict.values():
+            concepts += v['gpt']
+        concepts = list(set(concepts))
+        texts = [c.lower() for c in concepts] + ['unknown']
+        texts_tokenized = clip.tokenize(texts).to(device)
+        texts_encoded = clip_model.encode_text(texts_tokenized)
+    else:
+        texts = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
+        texts_tokenized = clip.tokenize(texts).to(device)
+        texts_encoded = clip_model.encode_text(texts_tokenized)
 
     d_clip = 1024 if args.clip_name == 'RN50' else 512
     model = build_model(256, d_clip, texts_encoded.float(), args)

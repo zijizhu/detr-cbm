@@ -1,0 +1,802 @@
+{
+    "1": {
+        "category": "person",
+        "gpt": [
+            "Facial features",
+            "Hair",
+            "Body shape and size",
+            "Clothing",
+            "Unique distinguishing features"
+        ]
+    },
+    "2": {
+        "category": "bicycle",
+        "gpt": [
+            "Two wheels",
+            "Frame",
+            "Handlebars",
+            "Pedals",
+            "Bicycle seat"
+        ]
+    },
+    "3": {
+        "category": "car",
+        "gpt": [
+            "Wheels",
+            "License plate",
+            "Headlights",
+            "Rearview mirrors",
+            "Body shape"
+        ]
+    },
+    "4": {
+        "category": "motorcycle",
+        "gpt": [
+            "Two wheels",
+            "Handlebars",
+            "Engine",
+            "Exhaust pipe",
+            "Fairing or body panels"
+        ]
+    },
+    "5": {
+        "category": "airplane",
+        "gpt": [
+            "Wings",
+            "Tail fin",
+            "Cockpit",
+            "Landing gear",
+            "Propellers"
+        ]
+    },
+    "6": {
+        "category": "bus",
+        "gpt": [
+            "Large size",
+            "Long and rectangular shape",
+            "Double-decker or single-decker structure",
+            "Windows along the sides",
+            "Bus number or signage displayed on the front or sides"
+        ]
+    },
+    "7": {
+        "category": "train",
+        "gpt": [
+            "Rectangular shape",
+            "Long and cylindrical body",
+            "Multiple carriages",
+            "Train tracks",
+            "Smokestack or locomotive at the front"
+        ]
+    },
+    "8": {
+        "category": "truck",
+        "gpt": [
+            "Large size",
+            "Rectangular shape",
+            "High ground clearance",
+            "Multiple wheels",
+            "Open cargo area"
+        ]
+    },
+    "9": {
+        "category": "boat",
+        "gpt": [
+            "Shape",
+            "Floating",
+            "Hull",
+            "Mast",
+            "Rudder"
+        ]
+    },
+    "10": {
+        "category": "traffic light",
+        "gpt": [
+            "Circular shape",
+            "Multiple colored lights",
+            "Vertical alignment of lights",
+            "Black housing/mounting pole",
+            "Light emission"
+        ]
+    },
+    "11": {
+        "category": "fire hydrant",
+        "gpt": [
+            "Reflective surface",
+            "Distinct shape",
+            "Color",
+            "Cap or cover",
+            "Water outlet"
+        ]
+    },
+    "13": {
+        "category": "stop sign",
+        "gpt": [
+            "Octagonal shape with eight sides.",
+            "Red color.",
+            "White text saying \"STOP\".",
+            "Symmetric design.",
+            "Reflective material for better visibility at night."
+        ]
+    },
+    "14": {
+        "category": "parking meter",
+        "gpt": [
+            "Rectangular shape",
+            "Display screen",
+            "Coin slot",
+            "Signage",
+            "Mounting hardware"
+        ]
+    },
+    "15": {
+        "category": "bench",
+        "gpt": [
+            "Flat and elongated surface",
+            "Solid and sturdy structure",
+            "Multiple visible plank or slat-like parts",
+            "Generally rectangular shape",
+            "Usually found in outdoor settings"
+        ]
+    },
+    "16": {
+        "category": "bird",
+        "gpt": [
+            "Feathers",
+            "Wings",
+            "Beak",
+            "Tail",
+            "Plumage/pattern/colorful appearance"
+        ]
+    },
+    "17": {
+        "category": "cat",
+        "gpt": [
+            "Whiskers",
+            "Pointed ears",
+            "Slit-shaped pupils",
+            "Fur",
+            "Tail"
+        ]
+    },
+    "18": {
+        "category": "dog",
+        "gpt": [
+            "Four legs",
+            "Tail",
+            "Fur/coat",
+            "Snout/nose",
+            "Ears"
+        ]
+    },
+    "19": {
+        "category": "horse",
+        "gpt": [
+            "Four-legged",
+            "Long neck",
+            "Mane",
+            "Hooves",
+            "Long tail"
+        ]
+    },
+    "20": {
+        "category": "sheep",
+        "gpt": [
+            "Fluffy coat or wool",
+            "Horns",
+            "Four legs",
+            "Hooves",
+            "Ears"
+        ]
+    },
+    "21": {
+        "category": "cow",
+        "gpt": [
+            "Fur or hair",
+            "Hooves",
+            "Horns",
+            "Udder",
+            "Distinctive black and white or brown and white markings"
+        ]
+    },
+    "22": {
+        "category": "elephant",
+        "gpt": [
+            "Large size",
+            "Long trunk",
+            "Large, floppy ears",
+            "Tusk",
+            "Thick, wrinkled skin"
+        ]
+    },
+    "23": {
+        "category": "bear",
+        "gpt": [
+            "Fur",
+            "Large size",
+            "Round ears",
+            "Snout",
+            "Claws"
+        ]
+    },
+    "24": {
+        "category": "zebra",
+        "gpt": [
+            "Striped pattern",
+            "Long legs",
+            "Horse-like body shape",
+            "Hooves",
+            "Size"
+        ]
+    },
+    "25": {
+        "category": "giraffe",
+        "gpt": [
+            "Long neck",
+            "Spotted or patterned fur",
+            "Horn-like ossicones on the head",
+            "Long legs",
+            "Distinctive bulging eyes"
+        ]
+    },
+    "27": {
+        "category": "backpack",
+        "gpt": [
+            "Zipper",
+            "Shoulder Straps",
+            "Pockets",
+            "Handle",
+            "Rectangular Shape"
+        ]
+    },
+    "28": {
+        "category": "umbrella",
+        "gpt": [
+            "Canopy",
+            "Handle",
+            "Ribs",
+            "Shaft",
+            "Folding Mechanism"
+        ]
+    },
+    "31": {
+        "category": "handbag",
+        "gpt": [
+            "Handle",
+            "Zipper or closure",
+            "Straps or shoulder strap",
+            "Exterior pockets or compartments",
+            "Clasp or buckle"
+        ]
+    },
+    "32": {
+        "category": "tie",
+        "gpt": [
+            "Shape",
+            "Texture",
+            "Color",
+            "Knot",
+            "Length"
+        ]
+    },
+    "33": {
+        "category": "suitcase",
+        "gpt": [
+            "Rectangular shape",
+            "Handle",
+            "Zipper",
+            "Wheels",
+            "Hard or rigid structure"
+        ]
+    },
+    "34": {
+        "category": "frisbee",
+        "gpt": [
+            "Circular shape",
+            "Flat and round structure",
+            "Bright color",
+            "Smooth surface texture",
+            "Lightweight material"
+        ]
+    },
+    "35": {
+        "category": "skis",
+        "gpt": [
+            "Long and narrow shape",
+            "Curved tips at both ends",
+            "Attachment points for bindings",
+            "Smooth, glossy surface",
+            "Serrated edges"
+        ]
+    },
+    "36": {
+        "category": "snowboard",
+        "gpt": [
+            "Flat and elongated shape",
+            "Wide and large surface area",
+            "Distinctive graphics or designs on the surface",
+            "Straps or bindings attached on the board",
+            "Smooth and polished surface texture"
+        ]
+    },
+    "37": {
+        "category": "sports ball",
+        "gpt": [
+            "Round shape",
+            "Smooth surface",
+            "Textured or grooved surface",
+            "Distinctive color patterns",
+            "Elastic or bouncy appearance"
+        ]
+    },
+    "38": {
+        "category": "kite",
+        "gpt": [
+            "Frame shape",
+            "Tail length",
+            "Bridle",
+            "Material",
+            "Wind interaction"
+        ]
+    },
+    "39": {
+        "category": "baseball bat",
+        "gpt": [
+            "Long and cylindrical shape",
+            "Tapered end",
+            "Smooth surface texture",
+            "Solid and sturdy appearance",
+            "Usually made of wood or metal materials."
+        ]
+    },
+    "40": {
+        "category": "baseball glove",
+        "gpt": [
+            "Size",
+            "Shape",
+            "Texture",
+            "Color",
+            "Lacing or stitching"
+        ]
+    },
+    "41": {
+        "category": "skateboard",
+        "gpt": [
+            "Rectangular shape",
+            "Wheels",
+            "Deck with grip tape",
+            "Axles and trucks",
+            "Stickers or artwork on the deck"
+        ]
+    },
+    "42": {
+        "category": "surfboard",
+        "gpt": [
+            "Long and narrow shape",
+            "Pointed and curved front end",
+            "Flat and wide back end",
+            "Smooth and glossy surface texture",
+            "Fins or stabilizers on the underside"
+        ]
+    },
+    "43": {
+        "category": "tennis racket",
+        "gpt": [
+            "Elongated shape",
+            "Handle or grip",
+            "Strings or mesh pattern",
+            "Solid structure",
+            "Flat, oval-shaped head"
+        ]
+    },
+    "44": {
+        "category": "bottle",
+        "gpt": [
+            "Cylindrical shape",
+            "Narrow neck",
+            "Cap or cork at the top",
+            "Smooth surface",
+            "Transparent or translucent material"
+        ]
+    },
+    "46": {
+        "category": "wine glass",
+        "gpt": [
+            "Transparent or translucent material",
+            "Stem or base at the bottom",
+            "Curved or rounded shape",
+            "Long and smooth neck",
+            "Wide, round opening"
+        ]
+    },
+    "47": {
+        "category": "cup",
+        "gpt": [
+            "Cylindrical shape",
+            "Handle",
+            "Round rim",
+            "Hollow interior",
+            "Solid body"
+        ]
+    },
+    "48": {
+        "category": "fork",
+        "gpt": [
+            "Pronged shape",
+            "Metallic appearance",
+            "Tine spacing",
+            "Handle length",
+            "Flat and slender profile"
+        ]
+    },
+    "49": {
+        "category": "knife",
+        "gpt": [
+            "Blade",
+            "Handle",
+            "Pointed Tip",
+            "Metallic Surface",
+            "Serrated Edge"
+        ]
+    },
+    "50": {
+        "category": "spoon",
+        "gpt": [
+            "Handle",
+            "Scoop-shaped head",
+            "Shiny or reflective surface",
+            "Generally elongated shape",
+            "Typically made of metal or plastic"
+        ]
+    },
+    "51": {
+        "category": "bowl",
+        "gpt": [
+            "Rounded shape",
+            "Hollow interior",
+            "Smooth surface",
+            "Curved edges",
+            "Bowl-like depth or concavity"
+        ]
+    },
+    "52": {
+        "category": "banana",
+        "gpt": [
+            "Color",
+            "Shape",
+            "Texture",
+            "Size",
+            "Surface markings"
+        ]
+    },
+    "53": {
+        "category": "apple",
+        "gpt": [
+            "Round shape",
+            "Red or green color",
+            "Smooth texture",
+            "Stem at the top",
+            "Shiny skin"
+        ]
+    },
+    "54": {
+        "category": "sandwich",
+        "gpt": [
+            "Bread",
+            "Filling",
+            "Layers",
+            "Shape",
+            "Toppings"
+        ]
+    },
+    "55": {
+        "category": "orange",
+        "gpt": [
+            "Round shape",
+            "Orange color",
+            "Textured peel",
+            "Citrus scent",
+            "Segmented sections"
+        ]
+    },
+    "56": {
+        "category": "broccoli",
+        "gpt": [
+            "Green color",
+            "Irregular shape",
+            "Clustered florets",
+            "Textured surface",
+            "Stem at the bottom"
+        ]
+    },
+    "57": {
+        "category": "carrot",
+        "gpt": [
+            "Long and slender shape",
+            "Orange color",
+            "Tapered ends",
+            "Rough and slightly grooved texture",
+            "Green leafy top"
+        ]
+    },
+    "58": {
+        "category": "hot dog",
+        "gpt": [
+            "Cylindrical shape",
+            "Bun or bread-like exterior",
+            "Long and slender",
+            "Sausage-like appearance",
+            "Usually served with condiments"
+        ]
+    },
+    "59": {
+        "category": "pizza",
+        "gpt": [
+            "Circular shape",
+            "Round edges",
+            "Flat and circular base",
+            "Toppings",
+            "Browned crust"
+        ]
+    },
+    "60": {
+        "category": "donut",
+        "gpt": [
+            "Circular shape",
+            "Round hole in the center",
+            "Smooth texture",
+            "Brown or golden color",
+            "Glazed or frosted appearance"
+        ]
+    },
+    "61": {
+        "category": "cake",
+        "gpt": [
+            "Round shape",
+            "Fluffy texture",
+            "Decorative frosting or icing",
+            "Layered structure",
+            "Edible materials"
+        ]
+    },
+    "62": {
+        "category": "chair",
+        "gpt": [
+            "Surface area",
+            "Backrest",
+            "Legs",
+            "Seat shape",
+            "Armrests"
+        ]
+    },
+    "63": {
+        "category": "couch",
+        "gpt": [
+            "Cushioned surface",
+            "Upholstered fabric or leather cover",
+            "Armrests",
+            "Backrest",
+            "Seat cushions"
+        ]
+    },
+    "64": {
+        "category": "potted plant",
+        "gpt": [
+            "Green-colored foliage",
+            "Leafy structure",
+            "Soil or potting medium at the base",
+            "Plant stem or stalk",
+            "Overall compact and contained growth pattern"
+        ]
+    },
+    "65": {
+        "category": "bed",
+        "gpt": [
+            "Rectangular shape",
+            "Soft and cushioned surface",
+            "Vertical headboard or backrest",
+            "Horizontal platform or mattress",
+            "Elevated legs or base"
+        ]
+    },
+    "67": {
+        "category": "dining table",
+        "gpt": [
+            "Flat surface",
+            "Four legs",
+            "Rectangular shape",
+            "Center support or base",
+            "Often accompanied by chairs"
+        ]
+    },
+    "70": {
+        "category": "toilet",
+        "gpt": [
+            "Bowl shape",
+            "Flushing mechanism",
+            "Lid or seat",
+            "Water tank",
+            "Plumbing connections"
+        ]
+    },
+    "72": {
+        "category": "tv",
+        "gpt": [
+            "Screen",
+            "Stand",
+            "Remote Control",
+            "Antenna/Cable Input",
+            "Speakers"
+        ]
+    },
+    "73": {
+        "category": "laptop",
+        "gpt": [
+            "Rectangular shape with a hinged lid",
+            "Keyboard layout with keys of different sizes and shapes",
+            "Display screen attached to the base",
+            "Trackpad or touchpad for cursor control",
+            "Portability and lightweight design"
+        ]
+    },
+    "74": {
+        "category": "mouse",
+        "gpt": [
+            "Small size and compact shape",
+            "Rounded body with a long, thin tail",
+            "Button or scroll wheel on top surface",
+            "Smooth or glossy texture",
+            "Attached wire or wireless receiver"
+        ]
+    },
+    "75": {
+        "category": "remote",
+        "gpt": [
+            "Rectangular shape",
+            "Buttons",
+            "Infra-red signal receiver",
+            "Text or symbols",
+            "Glossy or matte finish"
+        ]
+    },
+    "76": {
+        "category": "keyboard",
+        "gpt": [
+            "Rectangular shape",
+            "Array of keys",
+            "Letters and numbers",
+            "Function keys",
+            "Connection port"
+        ]
+    },
+    "77": {
+        "category": "cell phone",
+        "gpt": [
+            "Screen",
+            "Size",
+            "Buttons",
+            "Camera",
+            "SIM card slot"
+        ]
+    },
+    "78": {
+        "category": "microwave",
+        "gpt": [
+            "Rectangular shape",
+            "Control panel with buttons or touch display",
+            "Openable door at the front",
+            "Turntable inside for rotating food",
+            "Ventilation holes on the sides or back."
+        ]
+    },
+    "79": {
+        "category": "oven",
+        "gpt": [
+            "Metallic surface",
+            "Glass door",
+            "Temperature control knobs",
+            "Interior racks or shelves",
+            "Heating elements"
+        ]
+    },
+    "80": {
+        "category": "toaster",
+        "gpt": [
+            "Rectangular shape",
+            "Slots",
+            "Control knobs/buttons",
+            "Bread crumbs tray",
+            "Heating elements"
+        ]
+    },
+    "81": {
+        "category": "sink",
+        "gpt": [
+            "Bowl-shaped basin",
+            "Faucet or tap",
+            "Drain",
+            "Porcelain or metal material",
+            "Water or soap dispenser"
+        ]
+    },
+    "82": {
+        "category": "refrigerator",
+        "gpt": [
+            "Rectangular shape",
+            "Shelves or compartments",
+            "Door or multiple doors",
+            "Handle or latch",
+            "Cooling grates"
+        ]
+    },
+    "84": {
+        "category": "book",
+        "gpt": [
+            "Rectangular shape",
+            "Flat surface",
+            "Pages",
+            "Spine",
+            "Text or patterns on the cover"
+        ]
+    },
+    "85": {
+        "category": "clock",
+        "gpt": [
+            "Circular shape",
+            "Clock hands",
+            "Numerals or markers",
+            "Clock face",
+            "Clock mechanism"
+        ]
+    },
+    "86": {
+        "category": "vase",
+        "gpt": [
+            "Rounded shape",
+            "Narrow neck or opening",
+            "Hollow interior",
+            "Smooth surface texture",
+            "Decorative patterns or designs"
+        ]
+    },
+    "87": {
+        "category": "scissors",
+        "gpt": [
+            "Long, slender shape",
+            "Two sharp blades",
+            "Finger holes or handles",
+            "Metallic or plastic material",
+            "Hinged mechanism for opening and closing"
+        ]
+    },
+    "88": {
+        "category": "teddy bear",
+        "gpt": [
+            "Fur",
+            "Round head",
+            "Round ears",
+            "Short limbs",
+            "Teddy bear face shape"
+        ]
+    },
+    "89": {
+        "category": "hair drier",
+        "gpt": [
+            "Handle",
+            "Nozzle",
+            "Buttons or controls",
+            "Fan",
+            "Heat settings"
+        ]
+    },
+    "90": {
+        "category": "toothbrush",
+        "gpt": [
+            "Handle",
+            "Bristles",
+            "Tubular shape",
+            "Small size",
+            "Narrow head"
+        ]
+    }
+}
