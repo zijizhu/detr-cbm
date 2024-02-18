@@ -17,7 +17,7 @@ python main_inference.py --device cuda --output_dir outputs --resume checkpoints
 
 Run training script with detr's default hyperparameters
 ```bash
-python main_detr_cbm.py --dataset_path data --coco_path coco --output_dir outputs --device cpu
+python main_detr_cbm.py --concepts --dataset_path data --coco_path coco --output_dir outputs --device cpu
 ```
 
 Run training script with clip4hoi's default hyperparameters

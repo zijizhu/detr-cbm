@@ -118,16 +118,16 @@ def main(args):
         for v in concepts_dict.values():
             concepts += v['gpt']
         concepts = list(set(concepts))
-        texts = [c.lower() for c in concepts] + ['unknown']
-        texts_tokenized = clip.tokenize(texts).to(device)
-        texts_encoded = clip_model.encode_text(texts_tokenized)
-    else:
-        texts = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
-        texts_tokenized = clip.tokenize(texts).to(device)
-        texts_encoded = clip_model.encode_text(texts_tokenized)
+        concepts = [c.lower() for c in concepts] + ['unknown']
+        concepts_tokenized = clip.tokenize(concepts).to(device)
+        concepts_encoded = clip_model.encode_text(concepts_tokenized)
+
+    labels = ['a ' + base_ds.cats[i]['name'] if i in base_ds.cats else 'unknown' for i in range(91)] + ['unknown']
+    labels_tokenized = clip.tokenize(labels).to(device)
+    labels_encoded = clip_model.encode_text(labels_tokenized)
 
     d_clip = 1024 if args.clip_name == 'RN50' else 512
-    model = build_model(256, d_clip, texts_encoded.float(), args)
+    model = build_model(256, d_clip, concepts_encoded.float() if args.concepts else labels_encoded.float(), args)
 
     weight_dict = {'loss_ce': 1, 'loss_bbox': args.bbox_loss_coef, 'loss_giou': args.giou_loss_coef}
     losses = ['labels', 'boxes', 'cardinality']
@@ -160,7 +160,7 @@ def main(args):
             args.start_epoch = checkpoint['epoch'] + 1
 
     if args.eval:
-        test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
+        test_stats, coco_evaluator = evaluate(model, criterion, postprocessors, 
                                               data_loader_val, base_ds, device)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
@@ -192,12 +192,18 @@ def main(args):
         test_stats, coco_evaluator, val_outputs = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device
         )
+        test_stats_zs, coco_evaluator_zs, val_outputs_zs = evaluate(
+            model, criterion, postprocessors, data_loader_val, base_ds, device
+        )
         if args.output_dir:
             val_output_paths = output_dir / f'val_outputs{epoch}.pth'
+            val_output_zs_paths = output_dir / f'val_outputs_zs{epoch}.pth'
             utils.save_on_master(val_outputs, val_output_paths)
+            utils.save_on_master(val_outputs_zs, val_output_zs_paths)
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},
+                     **{f'test_zs_{k}': v for k, v in test_stats_zs.items()},
                      'epoch': epoch,
                      'n_parameters': n_parameters}
 

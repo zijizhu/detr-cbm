@@ -62,7 +62,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 
 
 @torch.no_grad()
-def evaluate(model, criterion, postprocessors, data_loader, base_ds, device):
+def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, label_embeds=None):
     model.eval()
     criterion.eval()
 
@@ -78,6 +78,8 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device):
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
         features, logits = model(clip_fs, detr_fs)
+        if label_embeds is not None:
+            logits = torch.softmax(features @ label_embeds.T, dim=-1)
         outputs = {'pred_logits': logits, 'pred_boxes': detr_boxes.to(device)}
 
         loss_dict = criterion(outputs, targets)
