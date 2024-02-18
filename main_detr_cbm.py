@@ -193,7 +193,7 @@ def main(args):
             model, criterion, postprocessors, data_loader_val, base_ds, device
         )
         test_stats_zs, coco_evaluator_zs, val_outputs_zs = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device
+            model, criterion, postprocessors, data_loader_val, base_ds, device, labels_encoded
         )
         if args.output_dir:
             val_output_paths = output_dir / f'val_outputs{epoch}.pth'
@@ -212,15 +212,11 @@ def main(args):
                 f.write(json.dumps(log_stats) + "\n")
 
             # for evaluation logs
-            if coco_evaluator is not None:
-                (output_dir / 'eval').mkdir(exist_ok=True)
-                if "bbox" in coco_evaluator.coco_eval:
-                    filenames = ['latest.pth']
-                    if epoch % 50 == 0:
-                        filenames.append(f'{epoch:03}.pth')
-                    for name in filenames:
-                        torch.save(coco_evaluator.coco_eval["bbox"].eval,
-                                   output_dir / "eval" / name)
+            # if coco_evaluator is not None:
+            #     (output_dir / 'eval').mkdir(exist_ok=True)
+            #     filename = f'{epoch:03}.pth'
+            #     torch.save(coco_evaluator.coco_eval["bbox"].eval,
+            #                 output_dir / "eval" / filename)
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

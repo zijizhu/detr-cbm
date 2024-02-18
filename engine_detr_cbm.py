@@ -103,7 +103,9 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
         if coco_evaluator is not None:
             coco_evaluator.update(res)
         
-        saved_outputs.append({'features': features, 'outputs': outputs, 'targets': targets})
+        saved_outputs.append({'features': features.cpu(),
+                              'outputs': {k: v.cpu() for k, v in outputs.items()},
+                              'targets': {k: v.cpu() for k, v in targets.items()}})
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
