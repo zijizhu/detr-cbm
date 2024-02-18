@@ -12,11 +12,11 @@ import clip
 from torch.utils.data import DataLoader, DistributedSampler
 
 from model import build_model
-import detr.util.misc as utils
-from detr.models.matcher import build_matcher
+import detr_modified.util.misc as utils
+from detr_modified.models.matcher import build_matcher
 from dataset import DetrClipDataset, collate_fn
 from engine_detr_cbm import evaluate, train_one_epoch
-from detr.models.detr import PostProcess, SetCriterion
+from detr_modified.models.detr import PostProcess, SetCriterion
 
 
 def get_args_parser():

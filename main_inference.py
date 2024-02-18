@@ -12,11 +12,11 @@ import torch
 from torch.utils.data import DataLoader, DistributedSampler
 
 import torchvision
-import detr.util.misc as utils
-from detr.datasets.coco import make_coco_transforms, ConvertCocoPolysToMask
-from detr.datasets import build_dataset, get_coco_api_from_dataset
+import detr_modified.util.misc as utils
+from detr_modified.datasets.coco import make_coco_transforms, ConvertCocoPolysToMask
+from detr_modified.datasets import build_dataset, get_coco_api_from_dataset
 from detr_clip_engine import evaluate_and_save
-from detr.models import build_model
+from detr_modified.models import build_model
 
 
 def get_args_parser():

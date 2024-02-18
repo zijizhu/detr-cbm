@@ -1,0 +1,3 @@
+[submodule "detr_modified"]
+	path = detr_modified
+	url = https://github.com/zijizhu/detr-modified

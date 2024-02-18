@@ -4,7 +4,7 @@ import math
 import torch
 from typing import Iterable
 
-import detr.util.misc as utils
+import detr_modified.util.misc as utils
 from cocoeval import CocoEvaluator
 
 

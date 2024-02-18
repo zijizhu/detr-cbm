@@ -10,8 +10,8 @@ from typing import Iterable
 
 import torch
 
-import detr.util.misc as utils
-from detr.datasets.coco_eval import CocoEvaluator
+import detr_modified.util.misc as utils
+from detr_modified.datasets.coco_eval import CocoEvaluator
 
 
 @torch.no_grad()
