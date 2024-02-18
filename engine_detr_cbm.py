@@ -79,7 +79,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
 
         features, logits = model(clip_fs, detr_fs)
         if label_embeds is not None:
-            logits = torch.softmax(features @ label_embeds.T, dim=-1)
+            logits = features @ label_embeds.T
         outputs = {'pred_logits': logits, 'pred_boxes': detr_boxes.to(device)}
 
         loss_dict = criterion(outputs, targets)
@@ -105,7 +105,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
         
         saved_outputs.append({'features': features.cpu(),
                               'outputs': {k: v.cpu() for k, v in outputs.items()},
-                              'targets': {k: v.cpu() for k, v in targets.items()}})
+                              'targets': [{k: v.cpu() for k, v in t.items()} for t in targets]})
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()

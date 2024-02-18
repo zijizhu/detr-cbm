@@ -193,7 +193,7 @@ def main(args):
             model, criterion, postprocessors, data_loader_val, base_ds, device
         )
         test_stats_zs, coco_evaluator_zs, val_outputs_zs = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device, labels_encoded
+            model, criterion, postprocessors, data_loader_val, base_ds, device, labels_encoded.float()
         )
         if args.output_dir:
             val_output_paths = output_dir / f'val_outputs{epoch}.pth'
