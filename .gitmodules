@@ -1,3 +1,0 @@
-[submodule "detr"]
-	path = detr
-	url = https://github.com/zijizhu/detr.git
