@@ -110,13 +110,8 @@ def main(args):
     # Build models
     clip_model, _ = clip.load(args.clip_name, device=device)
     concepts = []
-    with open('data/concepts_cleaned.json', 'r') as fp:
-        concepts_dict = json.load(fp=fp)
-    concepts = []
-    for v in concepts_dict.values():
-        concepts += v['gpt']
-    concepts = list(set(concepts))
-    concepts = [c.lower() for c in concepts] + ['unknown']
+    with open('data/concepts_cleaned_list.json', 'r') as fp:
+        concepts = json.load(fp=fp)
     concepts_tokenized = clip.tokenize(concepts).to(device)
     concepts_encoded = clip_model.encode_text(concepts_tokenized)
 
