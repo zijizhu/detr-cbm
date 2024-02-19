@@ -6,7 +6,7 @@
 git clone https://github.com/zijizhu/detr-cbm.git
 cd detr-cbm
 git submodule update --init
-bash download_inference.sh
+bash download_train.sh
 ```
 
 ## Run Scripts
