@@ -12,7 +12,7 @@ def build_model(d_detr, d_clip, text_encoded, args):
         d_detr=d_detr,
         d_clip=d_clip,
         text_encoded=text_encoded,
-        linear_probe=args.concepts,
+        linear_probe=True,
         nhead=args.nhead,
         num_layers=args.num_layers,
         dim_feedforward=args.dim_feedforward,
