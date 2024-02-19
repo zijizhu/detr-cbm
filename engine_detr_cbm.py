@@ -77,10 +77,10 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
         detr_fs, clip_fs = detr_fs.to(device), clip_fs.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        features, logits = model(clip_fs, detr_fs)
+        features, concept_logits, class_logits = model(clip_fs, detr_fs)
         if label_embeds is not None:
-            logits = features @ label_embeds.T
-        outputs = {'pred_logits': logits, 'pred_boxes': detr_boxes.to(device)}
+            class_logits = features @ label_embeds.T
+        outputs = {'pred_logits': class_logits, 'pred_boxes': detr_boxes.to(device)}
 
         loss_dict = criterion(outputs, targets)
         weight_dict = criterion.weight_dict
@@ -103,9 +103,13 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
         if coco_evaluator is not None:
             coco_evaluator.update(res)
         
-        saved_outputs.append({'features': features.cpu(),
-                              'outputs': {k: v.cpu() for k, v in outputs.items()},
-                              'targets': [{k: v.cpu() for k, v in t.items()} for t in targets]})
+        if label_embeds is None:
+            for f, concept_l, boxes, class_l, tgts in zip(features, concept_logits, detr_boxes, class_logits, targets):
+                saved_outputs.append({'features': f.detach().cpu(),
+                                      'concept_logits': class_l.detach().cpu(),
+                                      'boxes': boxes.detach().cpu(),
+                                      'concept_logits': concept_l.detach().cpu(),
+                                      'targets': {k: v.cpu() for k, v in tgts.items()}})
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()

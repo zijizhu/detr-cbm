@@ -42,12 +42,14 @@ class DetrClipFuserV2(nn.Module):
         clip_img_feature = clip_img_feature.unsqueeze(0)
         detr_proposals = detr_proposals.transpose(0, 1)
         detr_projected = self.linear_projection(detr_proposals)
-        out = self.decoder(tgt=detr_projected, memory=clip_img_feature)
-        out = out.squeeze(0).transpose(0, 1)
-        logits = out @ self.text_encoded.T
+        decoded = self.decoder(tgt=detr_projected, memory=clip_img_feature)
+        decoded = decoded.squeeze(0).transpose(0, 1)
+        concept_logits = decoded @ self.text_encoded.T
         if self.fc is not None:
-            logits = self.fc(logits)
-        return out, logits
+            class_logits = self.fc(concept_logits)
+        else:
+            class_logits = None
+        return decoded, concept_logits, class_logits
 
 
 def _get_activation_fn(activation):

@@ -3,9 +3,10 @@
 ## Setup
 
 ```bash
-git clone https://github.com/zijizhu/detr.gits
+git clone https://github.com/zijizhu/detr-cbm.git
+cd detr-cbm
 git submodule update --init
-bash download.sh
+bash download_inference.sh
 ```
 
 ## Run Scripts

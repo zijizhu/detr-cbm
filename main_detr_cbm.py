@@ -40,7 +40,7 @@ def get_args_parser():
     parser.add_argument('--lr', default=1e-4, type=float)
     parser.add_argument('--batch_size', default=32, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
-    parser.add_argument('--epochs', default=20, type=int)
+    parser.add_argument('--epochs', default=5, type=int)
     parser.add_argument('--lr_drop', default=200, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -176,47 +176,38 @@ def main(args):
             args.clip_max_norm)
         lr_scheduler.step()
         if args.output_dir:
-            checkpoint_paths = [output_dir / 'checkpoint.pth']
-            # extra checkpoint before LR drop and every 100 epochs
-            if (epoch + 1) % args.lr_drop == 0 or (epoch + 1) % 100 == 0:
-                checkpoint_paths.append(output_dir / f'checkpoint{epoch:04}.pth')
-            for checkpoint_path in checkpoint_paths:
-                utils.save_on_master({
-                    'model': model_without_ddp.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'lr_scheduler': lr_scheduler.state_dict(),
-                    'epoch': epoch,
-                    'args': args,
-                }, checkpoint_path)
+            utils.save_on_master({
+                'model': model_without_ddp.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'lr_scheduler': lr_scheduler.state_dict(),
+                'epoch': epoch,
+                'args': args,
+            }, output_dir / f'checkpoint_epoch{epoch}.pth')
 
         test_stats, coco_evaluator, val_outputs = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device
         )
-        test_stats_zs, coco_evaluator_zs, val_outputs_zs = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device, labels_encoded.float()
-        )
+
+        # Detach linear layer and perform detection using label embeddings directly
+        evaluate(model,
+                 criterion,
+                 postprocessors,
+                 data_loader_val,
+                 base_ds,
+                 device,
+                 labels_encoded.float())
         if args.output_dir:
-            val_output_paths = output_dir / f'val_outputs{epoch}.pth'
-            val_output_zs_paths = output_dir / f'val_outputs_zs{epoch}.pth'
+            val_output_paths = output_dir / f'val_outputs_epoch{epoch}.pth'
             utils.save_on_master(val_outputs, val_output_paths)
-            utils.save_on_master(val_outputs_zs, val_output_zs_paths)
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},
-                     **{f'test_zs_{k}': v for k, v in test_stats_zs.items()},
                      'epoch': epoch,
                      'n_parameters': n_parameters}
 
         if args.output_dir and utils.is_main_process():
             with (output_dir / "log.txt").open("a") as f:
                 f.write(json.dumps(log_stats) + "\n")
-
-            # for evaluation logs
-            # if coco_evaluator is not None:
-            #     (output_dir / 'eval').mkdir(exist_ok=True)
-            #     filename = f'{epoch:03}.pth'
-            #     torch.save(coco_evaluator.coco_eval["bbox"].eval,
-            #                 output_dir / "eval" / filename)
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
