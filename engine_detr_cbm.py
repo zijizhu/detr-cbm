@@ -106,9 +106,9 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, lab
         if label_embeds is None:
             for f, concept_l, boxes, class_l, tgts in zip(features, concept_logits, detr_boxes, class_logits, targets):
                 saved_outputs.append({'features': f.detach().cpu(),
-                                      'concept_logits': class_l.detach().cpu(),
-                                      'boxes': boxes.detach().cpu(),
                                       'concept_logits': concept_l.detach().cpu(),
+                                      'boxes': boxes.detach().cpu(),
+                                      'class_logits': class_l.detach().cpu(),
                                       'targets': {k: v.cpu() for k, v in tgts.items()}})
 
     # gather the stats from all processes
